@@ -24,18 +24,3 @@ export const EmptyList = styled.p`
 
 
 `
-
-export const Contact = styled.p`
-
-font-size:20px;
-
-`
-
-export const Number = Contact.withComponent('number');
-
-export const Wrapper = styled.div`
- 
-display:flex;
-gap:10px;
-align-items:center;
-`
