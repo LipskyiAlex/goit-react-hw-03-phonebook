@@ -4,15 +4,34 @@ import Contacts from './contacts/contacts';
 import Filter from './filter/filter';
 import { nanoid } from 'nanoid';
 import Notiflix from 'notiflix';
-import { MainContainer,MainTitle,SecondaryTitle } from './App.styled';
+import { MainContainer, MainTitle, SecondaryTitle } from './App.styled';
 
 class App extends React.Component {
   state = {
-    contacts: [
-
-    ],
+    contacts: [],
     filter: '',
   };
+
+  componentDidMount() {
+    const contactData = localStorage.getItem('contacts');
+
+    try {
+      if (contactData) {
+        const parsedContacts = JSON.parse(contactData);
+
+        this.setState({
+          contacts: parsedContacts,
+        });
+      }
+    } catch (error) {
+      
+      Notiflix.Notify.failure("Faild to fetch contacts, please contact the administrator");
+    }
+  }
+
+  componentDidUpdate() {
+    localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+  }
 
   handleChange = e => {
     const { name, value } = e.target;
@@ -23,7 +42,7 @@ class App extends React.Component {
 
   handleSubmit = (values, { resetForm }) => {
     const { name, number } = values;
-     const {contacts} = this.state;
+    const { contacts } = this.state;
     resetForm();
     const contactId = nanoid();
     const newContact = {
@@ -31,11 +50,17 @@ class App extends React.Component {
       contact: name,
       number: number,
     };
-    
-    if(contacts.find(contact => contact.contact.toLowerCase()===newContact.contact.toLowerCase())) {
-      return Notiflix.Notify.failure(`${newContact.contact} is already in contacts`);
+
+    if (
+      contacts.find(
+        contact =>
+          contact.contact.toLowerCase() === newContact.contact.toLowerCase()
+      )
+    ) {
+      return Notiflix.Notify.failure(
+        `${newContact.contact} is already in contacts`
+      );
     }
-    
 
     this.setState(prevState => ({
       contacts: [...prevState.contacts, newContact],
@@ -51,17 +76,15 @@ class App extends React.Component {
   render() {
     const { contacts, filter } = this.state;
     const filteredContacts = contacts.filter(({ contact }) =>
-    contact.toLowerCase().includes(filter.toLowerCase()));
+      contact.toLowerCase().includes(filter.toLowerCase())
+    );
     return (
       <MainContainer>
         <MainTitle>Phonebook</MainTitle>
         <Input onSubmit={this.handleSubmit} />
         <SecondaryTitle>Contacts</SecondaryTitle>
         <Filter filter={filter} onChange={this.handleChange} />
-        <Contacts
-          contacts={filteredContacts}
-          onDelete={this.handleDelete}
-        />
+        <Contacts contacts={filteredContacts} onDelete={this.handleDelete} />
       </MainContainer>
     );
   }
